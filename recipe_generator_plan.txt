@@ -1,0 +1,26 @@
+recipe:
+ingredients
+=> spices
+=> organics
+=> sauces
+=> optional ingredients
+=> json object
+
+steps
+=> time?
+=> order of events
+=> numbered
+=> extra details
+
+utensils
+=> pots + pans
+=> knives, spatula, etc.
+=> cutting board
+
+time
+=> prep time
+=> cook time
+
+scale
+=> # of people served
+=> for basic recipe, scaling
