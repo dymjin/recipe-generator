@@ -27,6 +27,6 @@ const whatsappLink = document.querySelector(".share");
     const msg = encodeURIComponent(
       `_*${title.value}*_\n\n*Description*\n${desc.value}`
     );
-    whatsappLink.href = `https://wa.me/?text=${msg}`;
+    whatsappLink.href = encodeURI(`https://wa.me/?text=${msg}`);
   })
 );
