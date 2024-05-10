@@ -24,3 +24,14 @@ time
 scale
 => # of people served
 => for basic recipe, scaling
+
+
+todo:
+- remove btn recipe tab
+- save recipe to storage?
+- sidebar button
+- sizing of tab inputs
+- responsive design
+- whatsapp link
+- css
+- groups if time
