@@ -1,4 +1,3 @@
-const whatsappLink = document.querySelector(".share");
 // const whatsappLink = encodeURI("https://wa.me/?text=urlencodedtext");
 let recipeCounter = 1,
   stepCounter = 1,
@@ -16,10 +15,10 @@ function storeRecipe() {
   const recipeDesc = document.querySelector(".recipe-desc");
   const recipeSteps = Array.from(
     document.querySelector(".recipe-step-wrapper").children
-  ).map((step) => step.firstChild.value);
+  ).map((step) => step.firstChild.firstChild.value);
   const recipeIngredients = Array.from(
     document.querySelector(".recipe-ingredient-wrapper").children
-  ).map((ingredient) => ingredient.firstChild.value);
+  ).map((ingredient) => ingredient.firstChild.firstChild.value);
   localStorage.setItem("recipe_title", recipeTitle.value);
   localStorage.setItem("recipe_desc", recipeDesc.value);
   localStorage.setItem("recipe_steps", JSON.stringify(recipeSteps));
@@ -34,15 +33,48 @@ function storeRecipe() {
       id: recipeTitle.parentElement.getAttribute("data"),
     })
   );
-  recipes[recipeTitle.parentElement.getAttribute("data") - 1] = {
-    title: recipeTitle.value,
-    desc: recipeDesc.value,
-    steps: recipeSteps,
-    ingredients: recipeIngredients,
-    id: recipeTitle.parentElement.getAttribute("data"),
-  };
+
+  let currRecipe = {};
+  const recipeList = JSON.parse(localStorage.getItem("recipe_list"));
+  if (recipeList.length) {
+    currRecipe = recipeList.at(
+      document.querySelector(".recipe-container").getAttribute("data") - 1
+    );
+    recipes = recipeList;
+  }
+  currRecipe.title = recipeTitle.value;
+  currRecipe.desc = recipeDesc.value;
+  currRecipe.steps = recipeSteps;
+  currRecipe.ingredients = recipeIngredients;
 
   localStorage.setItem("recipe_list", JSON.stringify(recipes));
+  localStorage.setItem(
+    "current_recipe_id",
+    document.querySelector(".recipe-container").getAttribute("data")
+  );
+  linkHandler();
+
+  // const mappedRecipes = Array.from(recipes).map((recipe) => {
+  //   return {
+  //     title: currRecipe.title,
+  //     desc: currRecipe.desc,
+  //     steps: currRecipe.steps,
+  //     ingredients: currRecipe.ingredients,
+  //     id: currRecipe.id,
+  //   };
+  // });
+  // console.log(mappedRecipes);
+  // if (mappedRecipes.length) {
+  //   localStorage.setItem("recipe_list", JSON.stringify(mappedRecipes));
+  // }
+
+  // recipes[recipeTitle.parentElement.getAttribute("data") - 1] = {
+  //   title: recipeTitle.value,
+  //   desc: recipeDesc.value,
+  //   steps: recipeSteps,
+  //   ingredients: recipeIngredients,
+  //   id: recipeTitle.parentElement.getAttribute("data"),
+  // };
 }
 
 function storeRecipeIngredient(ingredient, data) {
@@ -57,42 +89,50 @@ function storeRecipeIngredient(ingredient, data) {
 }
 
 function addRecipeIngredientDOM(ingredientTitle = "") {
+  const recipeIngredientItemWrapper = addElement(
+    "recipe-ingredient-item-wrapper",
+    "li",
+    document.querySelector(".recipe-ingredient-wrapper")
+  );
   const recipeIngredientItemContainer = addElement(
     "recipe-ingredient-item-container",
     "div",
-    document.querySelector(".recipe-ingredient-wrapper")
+    recipeIngredientItemWrapper
   );
 
   ingredientCounter = 0;
-  Array.from(recipeIngredientItemContainer.parentElement.children).forEach(
-    (elem) => {
-      ingredientCounter++;
-    }
-  );
-  recipeIngredientItemContainer.setAttribute("data", ingredientCounter);
+  Array.from(
+    document.querySelector(".recipe-ingredient-wrapper").children
+  ).forEach((elem) => {
+    ingredientCounter++;
+  });
+  recipeIngredientItemWrapper.setAttribute("data", ingredientCounter);
 
   const recipeIngredientTitle = addElement(
     "recipe-ingredient-title",
-    "input",
+    "textarea",
     recipeIngredientItemContainer
   );
+  recipeIngredientTitle.setAttribute("rows", 1);
   recipeIngredientTitle.value = ingredientTitle;
   recipeIngredientTitle.setAttribute("placeholder", "Tasty ingredient");
   recipeIngredientTitle.addEventListener("input", () => {
+    recipeIngredientTitle.style.height = "";
+    recipeIngredientTitle.style.height =
+      recipeIngredientTitle.scrollHeight + "px";
     storeRecipeIngredient(
       recipeIngredientTitle.value,
       recipeIngredientItemContainer.getAttribute("data")
     );
   });
   const recipeIngredientRemove = addElement(
-    "recipe-ingredient-remove",
-    "button",
+    "fa-solid fa-trash",
+    "i",
     recipeIngredientItemContainer
   );
-  recipeIngredientRemove.textContent = "Remove ingredient";
   recipeIngredientRemove.onclick = () => {
-    recipeIngredientRemove.parentElement.parentElement.removeChild(
-      recipeIngredientRemove.parentElement
+    recipeIngredientItemWrapper.parentElement.removeChild(
+      recipeIngredientItemWrapper
     );
     Array.from(
       document.querySelector(".recipe-ingredient-wrapper").children
@@ -110,6 +150,7 @@ function addRecipeIngredientDOM(ingredientTitle = "") {
       "recipe_ingredients",
       JSON.stringify(recipeIngredients)
     );
+    storeRecipe();
   };
 
   ingredientCounter++;
@@ -128,26 +169,36 @@ function storeRecipeStep(step, data) {
 }
 
 function addRecipeStepDOM(stepTitle = "") {
+  const recipeStepItemWrapper = addElement(
+    "recipe-step-item-wrapper",
+    "li",
+    document.querySelector(".recipe-step-wrapper")
+  );
   const recipeStepItemContainer = addElement(
     "recipe-step-item-container",
     "div",
-    document.querySelector(".recipe-step-wrapper")
+    recipeStepItemWrapper
   );
 
   stepCounter = 0;
-  Array.from(recipeStepItemContainer.parentElement.children).forEach((elem) => {
-    stepCounter++;
-  });
-  recipeStepItemContainer.setAttribute("data", stepCounter);
+  Array.from(document.querySelector(".recipe-step-wrapper").children).forEach(
+    (elem) => {
+      stepCounter++;
+    }
+  );
+  recipeStepItemWrapper.setAttribute("data", stepCounter);
 
   const recipeStepTitle = addElement(
     "recipe-step-title",
-    "input",
+    "textarea",
     recipeStepItemContainer
   );
+  recipeStepTitle.setAttribute("rows", 1);
   recipeStepTitle.value = stepTitle;
   recipeStepTitle.setAttribute("placeholder", "Cook meal until done.");
   recipeStepTitle.addEventListener("input", () => {
+    recipeStepTitle.style.height = "";
+    recipeStepTitle.style.height = recipeStepTitle.scrollHeight + "px";
     storeRecipeStep(
       recipeStepTitle,
       recipeStepItemContainer.getAttribute("data")
@@ -155,15 +206,13 @@ function addRecipeStepDOM(stepTitle = "") {
   });
 
   const recipeStepRemove = addElement(
-    "recipe-step-remove",
-    "button",
+    "fa-solid fa-trash",
+    "i",
     recipeStepItemContainer
   );
-  recipeStepRemove.textContent = "Remove step";
   recipeStepRemove.onclick = () => {
-    recipeStepRemove.parentElement.parentElement.removeChild(
-      recipeStepRemove.parentElement
-    );
+    recipeStepItemWrapper.parentElement.removeChild(recipeStepItemWrapper);
+
     Array.from(document.querySelector(".recipe-step-wrapper").children).forEach(
       (child, index) => {
         child.setAttribute("data", index + 1);
@@ -174,13 +223,20 @@ function addRecipeStepDOM(stepTitle = "") {
     );
     recipeSteps.splice(recipeStepItemContainer.getAttribute("data") - 1, 1);
     localStorage.setItem("recipe_steps", JSON.stringify(recipeSteps));
+    storeRecipe();
   };
 
   stepCounter++;
   return recipeStepTitle;
 }
 
-function addRecipeDOM(title = "", desc = "", steps = [], ingredients = []) {
+function addRecipeDOM(
+  title = "",
+  desc = "",
+  steps = [],
+  ingredients = [],
+  id = 1
+) {
   if (document.querySelector(".recipe-container")) {
     const recipeContainer = document.querySelector(".recipe-container");
     recipeContainer.parentElement.removeChild(recipeContainer);
@@ -191,22 +247,33 @@ function addRecipeDOM(title = "", desc = "", steps = [], ingredients = []) {
     "div",
     document.querySelector(".recipe-body")
   );
-  recipeContainer.setAttribute("data", recipeCounter);
-  recipeCounter++;
+  recipeContainer.setAttribute("data", 1);
 
-  const recipeTitle = addElement("recipe-title", "input", recipeContainer);
+  const recipeTitle = addElement("recipe-title", "textarea", recipeContainer);
   recipeTitle.setAttribute("placeholder", "Recipe Title");
+  recipeTitle.setAttribute("rows", 1);
   recipeTitle.value = title;
   recipeTitle.addEventListener("input", () => {
-    tabRecipe.textContent = recipeTitle.value || "Amazing recipe";
+    recipeTitle.style.height = "";
+    recipeTitle.style.height = recipeTitle.scrollHeight + "px";
+    document.querySelector(
+      `.tab-recipe[data="${document
+        .querySelector(".recipe-container")
+        .getAttribute("data")}"]`
+    ).textContent = recipeTitle.value || "Amazing recipe";
     localStorage.setItem("recipe_title", recipeTitle.value);
+    storeRecipe();
   });
 
   const recipeDesc = addElement("recipe-desc", "textarea", recipeContainer);
   recipeDesc.setAttribute("placeholder", "Describe your recipe");
   recipeDesc.textContent = desc;
+  recipeDesc.setAttribute("rows", 1);
   recipeDesc.addEventListener("input", () => {
+    recipeDesc.style.height = "";
+    recipeDesc.style.height = recipeDesc.scrollHeight + "px";
     localStorage.setItem("recipe_desc", recipeDesc.value);
+    storeRecipe();
   });
 
   const recipeStepContainer = addElement(
@@ -214,9 +281,15 @@ function addRecipeDOM(title = "", desc = "", steps = [], ingredients = []) {
     "div",
     recipeContainer
   );
+  const recipeStepHeader = addElement(
+    "recipe-step-header",
+    "div",
+    recipeStepContainer
+  );
+  recipeStepHeader.textContent = "Steps";
   const recipeStepWrapper = addElement(
     "recipe-step-wrapper",
-    "div",
+    "ol",
     recipeStepContainer
   );
   if (steps.length) {
@@ -238,6 +311,12 @@ function addRecipeDOM(title = "", desc = "", steps = [], ingredients = []) {
     "div",
     recipeContainer
   );
+  const recipeIngredientsHeader = addElement(
+    "recipe-ingredients-header",
+    "div",
+    recipeIngredientsContainer
+  );
+  recipeIngredientsHeader.textContent = "Ingredients";
   const recipeIngredientWrapper = addElement(
     "recipe-ingredient-wrapper",
     "ul",
@@ -257,72 +336,176 @@ function addRecipeDOM(title = "", desc = "", steps = [], ingredients = []) {
     storeRecipeIngredient(recipeIngredient.value);
   };
 
-  const tabRecipe = addElement(
-    "tab-recipe",
-    "div",
-    document.querySelector(".saved-recipes-container")
-  );
-  tabRecipe.textContent = title || "Amazing recipe";
-  tabRecipe.setAttribute("contenteditable", true);
-  tabRecipe.setAttribute("data", recipeContainer.getAttribute("data"));
+  // else {
+  //   const tabRecipe = addElement(
+  //     "tab-recipe",
+  //     "div",
+  //     document.querySelector(".saved-recipes-container")
+  //   );
+  //   tabRecipe.textContent = title || "Amazing recipe";
+  //   tabRecipe.setAttribute("data", "1");
+  //   tabClickHandler.onclick = () =>
+  //     tabClickHandler(tabRecipe.getAttribute("data"));
+  // }
   return [recipeTitle, recipeDesc];
 }
 
-const newRecipe = addElement("add-recipe", "button", document.body);
-newRecipe.textContent = "Add recipe";
+function addRecipeTab(title = "") {
+  const tabRecipeContainer = addElement(
+    "tab-recipe-container",
+    "div",
+    document.querySelector(".saved-recipes-container")
+  );
+  const tabRecipe = addElement("tab-recipe", "div", tabRecipeContainer);
+  tabRecipe.textContent = title || "Amazing recipe";
+  const recipes = JSON.parse(localStorage.getItem("recipe_list"));
+  tabRecipe.setAttribute("data", recipes.at(-1).id);
+  tabRecipe.onclick = () => tabClickHandler(tabRecipe.getAttribute("data"));
+  const tabRecipeRemove = addElement(
+    "tab-recipe-remove",
+    "i",
+    tabRecipeContainer
+  );
+}
+
+function addRecipeTabs() {
+  const recipes = JSON.parse(localStorage.getItem("recipe_list"));
+  if (recipes) {
+    const savedRecipes = document.querySelector(".saved-recipes-container");
+    if (savedRecipes.firstChild) {
+      while (savedRecipes.firstChild) {
+        savedRecipes.removeChild(savedRecipes.firstChild);
+      }
+    }
+    recipes.forEach((recipe, index) => {
+      const tabRecipeContainer = addElement(
+        "tab-recipe-container",
+        "div",
+        document.querySelector(".saved-recipes-container")
+      );
+      const tabRecipe = addElement("tab-recipe", "div", tabRecipeContainer);
+      tabRecipe.textContent = recipe.title || "Amazing recipe";
+      tabRecipe.setAttribute("data", index + 1);
+      tabRecipe.onclick = () => tabClickHandler(tabRecipe.getAttribute("data"));
+    });
+  }
+}
+
+function tabClickHandler(data) {
+  const recipeList = JSON.parse(localStorage.getItem("recipe_list"))[data - 1];
+  addRecipeDOM(
+    recipeList.title,
+    recipeList.desc,
+    recipeList.steps,
+    recipeList.ingredients,
+    JSON.parse(localStorage.getItem("recipe_list")).at(-1).id
+  );
+  const sidebar = document.querySelector(".recipe-tab-wrapper");
+  sidebar.classList.toggle("hidden");
+  const recipeContainer = document.querySelector(".recipe-container");
+  recipeContainer.setAttribute("data", data);
+  storeRecipe();
+  // addRecipeTab(document.querySelector(),recipeList.title);
+}
+
+const newRecipe = document.querySelector(".add-recipe");
 newRecipe.onclick = () => {
   newRecipeClickHandler();
 };
 
+const toggleSidebar = document.getElementById("toggle-sidebar");
+toggleSidebar.onclick = () => {
+  const sidebar = document.querySelector(".recipe-tab-wrapper");
+  sidebar.classList.toggle("hidden");
+};
+
 function newRecipeClickHandler() {
   const inputs = addRecipeDOM();
-  const recipeTitle = document.querySelector(".recipe-title");
-  const recipeDesc = document.querySelector(".recipe-desc");
-  const recipeSteps = Array.from(
-    document.querySelector(".recipe-step-wrapper").children
-  ).map((step) => step.firstChild.value);
-  const recipeIngredients = Array.from(
-    document.querySelector(".recipe-ingredient-wrapper").children
-  ).map((ingredient) => ingredient.firstChild.value);
+  const recipeList = JSON.parse(localStorage.getItem("recipe_list"));
+  if (recipeList?.length) {
+    recipes = recipeList;
+  }
+  if (recipes.length) {
+    id = +recipes.at(-1).id + 1;
+  } else {
+    id = 1;
+  }
   recipes.push({
-    title: recipeTitle.value,
-    desc: recipeDesc.value,
-    steps: recipeSteps,
-    ingredients: recipeIngredients,
-    id: recipeTitle.parentElement.getAttribute("data"),
+    title: "",
+    desc: "",
+    steps: [],
+    ingredients: [],
+    id: id,
   });
-  console.log(recipes);
+  const recipeContainer = document.querySelector(".recipe-container");
+  recipeContainer.setAttribute("data", recipes.at(-1)?.id || 1);
   localStorage.setItem("recipe_list", JSON.stringify(recipes));
-  inputs.forEach((input) =>
-    input.addEventListener("input", () => {
-      storeRecipe();
-    })
-  );
   storeRecipe();
+  addRecipeTab();
+
+  // inputs.forEach((input) =>
+  //   input.addEventListener("input", () => {
+  //     storeRecipe();
+  //   })
+  // );
 }
 
 window.onload = () => {
-  if (localStorage.getItem("recipe_full")) {
+  const recipes = JSON.parse(localStorage.getItem("recipe_list"));
+  if (recipes && recipes.length) {
     addRecipeDOM(
       localStorage.getItem("recipe_title"),
       localStorage.getItem("recipe_desc"),
       JSON.parse(localStorage.getItem("recipe_steps")),
-      JSON.parse(localStorage.getItem("recipe_ingredients"))
+      JSON.parse(localStorage.getItem("recipe_ingredients")),
+      localStorage.getItem("current_recipe_id") || 1
     );
+    addRecipeTabs();
   } else {
     newRecipeClickHandler();
+    storeRecipe();
   }
-  // title.value = params.get("recipeTitle");
-  // setStorage("test", params.get("recipeTitle"));
-  // setStorage("recipe_link", new URL(window.location.href));
-  // console.log(JSON.stringify(new URL(window.location.href)));
 };
 
-// [title, desc].forEach((input) =>
-//   input.addEventListener("input", () => {
-//     const msg = encodeURIComponent(
-//       `_*${title.value}*_\n\n*Description*\n${desc.value}`
-//     );
-//     whatsappLink.href = `https://wa.me/?text=${msg}`;
-//   })
-// );
+function linkHandler() {
+  const whatsapplink = document.getElementById("whatsapplink");
+  const recipeList = localStorage.getItem("recipe_list");
+
+  const recipe = JSON.parse(recipeList).at(
+    localStorage.getItem("current_recipe_id") - 1
+  );
+  let msg = `_*${recipe.title || "Amazing recipe"}*_\n\n*Description*\n${
+    recipe.desc || "Easy and delicious recipe"
+  }\n\n`;
+
+  msg += `*Steps*\n`;
+  if (recipe.steps.length) {
+    if (!recipe.steps.every((step) => step === "")) {
+      recipe.steps
+        .filter((step) => step !== "")
+        .forEach((step, index) => {
+          msg += `${index + 1}) ${step}\n`;
+        });
+    } else {
+      msg += `None yet\n`;
+    }
+  } else {
+    msg += `None yet\n`;
+  }
+  msg += `\n*Ingredients*\n`;
+  if (recipe.ingredients.length) {
+    if (!recipe.ingredients.every((ingredient) => ingredient === "")) {
+      recipe.ingredients
+        .filter((ingredient) => ingredient !== "")
+        .forEach((ingredient) => {
+          msg += `- ${ingredient}\n`;
+        });
+    } else {
+      msg += `None yet\n`;
+    }
+  } else {
+    msg += `None yet\n`;
+  }
+  const link = encodeURIComponent(msg);
+  whatsapplink.href = `https://wa.me/?text=${link}`;
+}

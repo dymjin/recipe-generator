@@ -10,25 +10,27 @@
       src="https://kit.fontawesome.com/32e898c3f5.js"
       crossorigin="anonymous"
     ></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Gloria+Hallelujah&family=Josefin+Sans&family=M+PLUS+Code+Latin:wght@500&family=Montserrat:wght@500&family=PT+Mono&family=Press+Start+2P&family=Reddit+Sans:ital,wght@0,200..900;1,200..900&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <div class="page-wrapper">
-      <div class="recipe-tab-wrapper">
+      <i id="toggle-sidebar" class="fa-solid fa-bars"></i>
+      <div class="recipe-tab-wrapper hidden">
         <div class="saved-recipes-wrapper">
-          <i class="fa-solid fa-bars"></i>
           <h1 id="saved-recipes-title">Saved Recipes</h1>
           <div class="saved-recipes-container"></div>
         </div>
-        <div class="recipe-group-wrapper">
+        <!-- <div class="recipe-group-wrapper">
           <h1 id="recipe-group-title">Groups</h1>
           <div class="recipe-group-container"></div>
-        </div>
+        </div> -->
       </div>
       <div class="recipe-body"></div>
-      <div class="ingredient-list-wrapper">
-        <h1 id="ingredient-list-title">Ingredients</h1>
-        <div class="ingredient-list-container"></div>
-      </div>
     </div>
     <!-- 
     <form action="" method="get">
@@ -39,4 +41,8 @@
     </form> -->
     <!-- <a href="" class="share">test</a> -->
   </body>
+  <div class="general-btn-container">
+    <a id="whatsapplink" href=""><i class="fa-solid fa-share"></i></a>
+    <i class="fa-solid fa-plus add-recipe"></i>
+  </div>
 </html>
